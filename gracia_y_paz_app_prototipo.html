@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gracia & Paz - Web App Devocional</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        aesthetic: {
+                            bg: '#FDFBF7',      /* Crema ultra suave y luminoso */
+                            sidebar: '#F5EFE6', /* Crema ligeramente más oscuro para barra lateral */
+                            rose: '#F1E3D3',    /* Rosa viejo pastel */
+                            roseDark: '#C99E75',/* Rosa dorado oscuro */
+                            sage: '#E3EED8',    /* Verde salvia suave */
+                            clay: '#8A7968',    /* Tono arcilla elegante */
+                            dark: '#3E362E',    /* Café profundo para máxima legibilidad */
+                            premium: '#D4AF37'  /* Dorado Premium */
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Tone.js for elegant audio experience -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF7;
+            color: #3E362E;
+        }
+        /* Custom scrollbar for clean web experience */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #E8D7CC;
+            border-radius: 10px;
+        }
+        /* Custom animated breathing circle */
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); background-color: rgba(241, 227, 211, 0.6); }
+            50% { transform: scale(1.5); background-color: rgba(201, 158, 117, 0.3); }
+        }
+        .breathing-active {
+            animation: breathe 8s infinite ease-in-out;
+        }
+        /* Page transition effects */
+        .page-transition {
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col md:flex-row overflow-x-hidden">
+
+    <!-- BARRA LATERAL (Desktop Sidebar) - Oculta en móviles, fija en desktop -->
+    <aside class="hidden md:flex md:w-72 bg-aesthetic-sidebar border-r border-aesthetic-rose/40 flex-col justify-between shrink-0 h-screen sticky top-0">
+        <div class="p-6 space-y-8 flex-1 flex flex-col">
+            <!-- Logo y Marca -->
+            <div class="border-b border-aesthetic-rose/60 pb-5">
+                <p class="text-[10px] uppercase tracking-widest text-aesthetic-clay font-bold">Plataforma Web</p>
+                <h1 class="font-serif text-3xl text-aesthetic-dark font-semibold italic mt-1">Gracia & Paz</h1>
+            </div>
+
+            <!-- Navegación Principal -->
+            <nav class="space-y-2 flex-1">
+                <button onclick="switchTab('hoy')" id="nav-hoy" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-aesthetic-roseDark bg-white shadow-sm font-semibold text-sm transition-all duration-200">
+                    <i class="fa-solid fa-sparkles text-lg"></i>
+                    <span>Hoy e Inicio</span>
+                </button>
+                <button onclick="switchTab('lectura')" id="nav-lectura" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-aesthetic-clay hover:text-aesthetic-dark hover:bg-white/50 font-medium text-sm transition-all duration-200">
+                    <i class="fa-solid fa-book-open text-lg"></i>
+                    <span>Planes de Lectura</span>
+                </button>
+                <button onclick="switchTab('oracion')" id="nav-oracion" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-aesthetic-clay hover:text-aesthetic-dark hover:bg-white/50 font-medium text-sm transition-all duration-200 relative">
+                    <i class="fa-solid fa-hands-praying text-lg"></i>
+                    <span>Oración & Diario</span>
+                    <span class="absolute right-4 w-2 h-2 bg-aesthetic-roseDark rounded-full"></span>
+                </button>
+                <button onclick="switchTab('galeria')" id="nav-galeria" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-aesthetic-clay hover:text-aesthetic-dark hover:bg-white/50 font-medium text-sm transition-all duration-200">
+                    <i class="fa-solid fa-images text-lg"></i>
+                    <span>Galería de Fondos</span>
+                </button>
+                <button onclick="switchTab('premium')" id="nav-premium" class="w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-aesthetic-clay hover:text-aesthetic-dark hover:bg-white/50 font-medium text-sm transition-all duration-200">
+                    <i class="fa-solid fa-crown text-lg text-amber-500"></i>
+                    <span>Suscripción Premium</span>
+                </button>
+            </nav>
+
+            <!-- Control del Prototipo integrado en el pie de la barra lateral -->
+            <div class="bg-white/60 p-4 rounded-2xl border border-aesthetic-rose/40 space-y-2.5">
+                <p class="text-[10px] font-bold text-aesthetic-clay uppercase tracking-wider">Modo de Demostración</p>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-aesthetic-dark/80">Anuncios Gratis</span>
+                    <button onclick="toggleAdSystem()" id="btnToggleAd" class="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-[9px] font-bold rounded-lg transition-colors">
+                        Activos
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Usuario / Cuenta sutil abajo -->
+        <div class="p-6 border-t border-aesthetic-rose/40 bg-white/40 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-aesthetic-rose rounded-full flex items-center justify-center text-aesthetic-clay font-bold text-sm">
+                    M🌸
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-aesthetic-dark">María Camino</p>
+                    <p class="text-[9px] text-aesthetic-clay">Cuenta Gratuita</p>
+                </div>
+            </div>
+            <button onclick="switchTab('premium')" id="premiumBadge" class="flex items-center gap-1 bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 text-[9px] font-bold px-2 py-1 rounded-full shadow-sm hover:scale-105 transition-transform">
+                <i class="fa-solid fa-crown text-amber-600"></i>
+                <span>PRO</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- BARRA DE NAVEGACIÓN SUPERIOR / INFERIOR (Mobile & Tablet) -->
+    <header class="md:hidden bg-aesthetic-sidebar px-4 py-3 flex justify-between items-center border-b border-aesthetic-rose/40 sticky top-0 z-40">
+        <div>
+            <h1 class="font-serif text-xl text-aesthetic-dark font-bold italic">Gracia & Paz</h1>
+        </div>
+        <div class="flex items-center gap-2">
+            <button onclick="switchTab('premium')" id="mobilePremiumBadge" class="flex items-center gap-1 bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm">
+                <i class="fa-solid fa-crown text-amber-600"></i>
+                <span>PRO</span>
+            </button>
+            <button onclick="showToast('Notificaciones: ¡Estás al día con tus lecturas!')" class="p-2 text-aesthetic-clay relative">
+                <i class="fa-regular fa-bell text-lg"></i>
+                <span class="absolute top-1 right-1 w-2 h-2 bg-rose-400 rounded-full"></span>
+            </button>
+        </div>
+    </header>
+
+    <!-- NAVEGACIÓN INFERIOR (Solo en pantallas móviles) -->
+    <nav class="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-aesthetic-rose/30 py-2 px-3 flex justify-around items-center z-40 shadow-xl">
+        <button onclick="switchTab('hoy')" id="mobile-nav-hoy" class="flex flex-col items-center gap-0.5 text-aesthetic-roseDark">
+            <i class="fa-solid fa-sparkles text-base"></i>
+            <span class="text-[9px] font-semibold">Hoy</span>
+        </button>
+        <button onclick="switchTab('lectura')" id="mobile-nav-lectura" class="flex flex-col items-center gap-0.5 text-aesthetic-clay/60">
+            <i class="fa-solid fa-book-open text-base"></i>
+            <span class="text-[9px] font-semibold">Lectura</span>
+        </button>
+        <button onclick="switchTab('oracion')" id="mobile-nav-oracion" class="flex flex-col items-center gap-0.5 text-aesthetic-clay/60">
+            <i class="fa-solid fa-hands-praying text-base"></i>
+            <span class="text-[9px] font-semibold">Oración</span>
+        </button>
+        <button onclick="switchTab('galeria')" id="mobile-nav-galeria" class="flex flex-col items-center gap-0.5 text-aesthetic-clay/60">
+            <i class="fa-solid fa-images text-base"></i>
+            <span class="text-[9px] font-semibold">Galería</span>
+        </button>
+        <button onclick="switchTab('premium')" id="mobile-nav-premium" class="flex flex-col items-center gap-0.5 text-aesthetic-clay/60">
+            <i class="fa-solid fa-crown text-base"></i>
+            <span class="text-[9px] font-semibold">Premium</span>
+        </button>
+    </nav>
+
+    <!-- CONTENEDOR PRINCIPAL DE CONTENIDO (Se expande en Web) -->
+    <main class="flex-1 overflow-y-auto px-4 md:px-12 py-8 space-y-8 pb-24 md:pb-12" id="appContent">
+
+        <!-- PESTAÑA: HOY -->
+        <div id="tab-hoy" class="page-transition space-y-8 max-w-5xl mx-auto">
+            <!-- Banner de Bienvenida Amplio con dos columnas -->
+            <div class="bg-gradient-to-br from-aesthetic-rose/50 via-aesthetic-bg to-white p-6 md:p-8 rounded-3xl border border-aesthetic-rose/30 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="space-y-2 text-center md:text-left">
+                    <h2 class="font-serif text-2xl md:text-3xl text-aesthetic-dark font-medium">Hola, querida amiga 🌸</h2>
+                    <p class="text-xs md:text-sm text-aesthetic-clay leading-relaxed max-w-xl">Bienvenida a tu espacio personal de paz en la web. Respira profundo, desconéctate del ruido diario y conéctate con Dios.</p>
+                </div>
+                <!-- Indicador de racha / compromiso diario interactivo -->
+                <div class="bg-white/80 border border-aesthetic-rose/40 px-5 py-4 rounded-2xl flex items-center gap-4 shadow-sm self-stretch md:self-auto justify-center">
+                    <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center text-amber-600">
+                        <i class="fa-solid fa-fire text-lg"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-aesthetic-clay font-medium">Tu racha de lectura</p>
+                        <p class="text-sm font-bold text-aesthetic-dark">🔥 5 Días Seguidos</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid del Inicio: Versículo del Día y Devocional Diario en paralelo -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Tarjeta del Versículo (Columna de 5) -->
+                <div class="lg:col-span-5 bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-aesthetic-rose/30 relative overflow-hidden flex flex-col justify-between min-h-[300px]">
+                    <div class="absolute -right-6 -top-6 text-aesthetic-rose/30 text-9xl font-serif select-none italic">“</div>
+                    <div class="space-y-4">
+                        <span class="text-[10px] uppercase tracking-widest text-aesthetic-roseDark font-bold block">Versículo de Hoy</span>
+                        <p class="font-serif text-lg md:text-xl text-aesthetic-dark leading-relaxed italic">
+                            "Porque yo sé muy bien los planes que tengo para ustedes —afirma el Señor—, planes de bienestar y no de calamidad, a fin de darles un futuro y una esperanza."
+                        </p>
+                    </div>
+                    <div class="flex justify-between items-center pt-6 border-t border-neutral-100">
+                        <span class="text-xs font-semibold text-aesthetic-clay tracking-wide">Jeremías 29:11 (NVI)</span>
+                        <div class="flex gap-2">
+                            <button onclick="shareVerse()" class="p-2.5 rounded-xl bg-aesthetic-bg text-aesthetic-clay hover:text-aesthetic-dark hover:bg-aesthetic-rose/40 transition-all text-xs flex items-center gap-1.5 font-medium">
+                                <i class="fa-solid fa-share-nodes"></i> Compartir
+                            </button>
+                            <button onclick="toggleFavoriteVerse(this)" class="p-2.5 rounded-xl bg-aesthetic-bg text-aesthetic-clay hover:text-rose-500 hover:bg-rose-50 transition-all text-xs">
+                                <i class="fa-regular fa-heart"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Devocional Diario Completo (Columna de 7) -->
+                <div class="lg:col-span-7 bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-aesthetic-rose/30 flex flex-col justify-between">
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] uppercase tracking-widest text-aesthetic-roseDark font-bold">Devocional Escrito</span>
+                            <span class="text-[11px] text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full font-medium">Lectura de 3 min</span>
+                        </div>
+                        <h3 class="font-serif text-xl md:text-2xl text-aesthetic-dark font-bold">Encontrando Descanso en la Tormenta</h3>
+                        <p class="text-xs md:text-sm text-aesthetic-dark/80 leading-relaxed">
+                            Vivimos en un mundo digital acelerado. A tus 15, 20 o 30 años, las expectativas, los estudios, la presión de las redes sociales y la incertidumbre del futuro pueden pesar demasiado sobre tus hombros. Hoy, Jesús te hace una invitación sincera y libre de juicios: <em>"Ven a mí y descansa"</em>. Su paz no es la ausencia de problemas, sino la presencia constante de quién sostiene tu mano en medio de la tormenta. Deja ir el control hoy y descansa en Su amor incondicional.
+                        </p>
+                    </div>
+
+                    <div class="mt-6 p-4 bg-aesthetic-bg rounded-2xl flex flex-col sm:flex-row items-center justify-between border border-aesthetic-rose/30 gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-aesthetic-rose rounded-full flex items-center justify-center text-aesthetic-clay shrink-0">
+                                <i class="fa-solid fa-headphones"></i>
+                            </div>
+                            <div class="text-center sm:text-left">
+                                <p class="text-xs font-semibold text-aesthetic-dark">¿Prefieres Escuchar?</p>
+                                <p class="text-[10px] text-aesthetic-clay">Devocional narrado en Audio Guía</p>
+                            </div>
+                        </div>
+                        <button onclick="playGuidedAudio()" class="w-full sm:w-auto px-5 py-2 bg-aesthetic-clay text-white rounded-full text-xs font-semibold hover:bg-aesthetic-dark transition-colors">
+                            <i class="fa-solid fa-play mr-1.5"></i> Escuchar Audio
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloque de Monetización: Anuncio Sutil (Patrocinado) -->
+            <div id="adBanner" class="bg-neutral-100 rounded-2xl p-4 border border-neutral-200 flex flex-col sm:flex-row items-center justify-between relative overflow-hidden transition-all duration-300 gap-4">
+                <span class="absolute top-1 left-2 text-[8px] uppercase tracking-widest text-neutral-400 font-bold">Anuncio Patrocinado</span>
+                <div class="flex items-center gap-3 mt-1">
+                    <img src="https://images.unsplash.com/photo-1544816155-12df9643f363?q=80&w=100&auto=format&fit=crop" class="w-12 h-12 rounded-lg object-cover shrink-0" alt="Ad">
+                    <div>
+                        <p class="text-xs font-bold text-neutral-700">Agendas de Oración Hermosas 🌸</p>
+                        <p class="text-[10px] text-neutral-500">Usa el código GRACIA para obtener un 15% de descuento en la tienda física o web.</p>
+                    </div>
+                </div>
+                <a href="#" onclick="showToast('Simulando enlace de afiliado...'); return false;" class="px-4 py-2 bg-aesthetic-clay/20 text-aesthetic-dark text-xs font-semibold rounded-xl hover:bg-aesthetic-clay/30 transition-colors w-full sm:w-auto text-center">Ver Colección</a>
+            </div>
+        </div>
+
+        <!-- PESTAÑA: PLAN DE LECTURA -->
+        <div id="tab-lectura" class="page-transition space-y-8 hidden max-w-5xl mx-auto">
+            <div class="text-center py-4">
+                <span class="text-[10px] uppercase tracking-widest text-aesthetic-roseDark font-bold block mb-1">Crecimiento Espiritual</span>
+                <h2 class="font-serif text-3xl text-aesthetic-dark font-bold">Rutas y Planes de Lectura</h2>
+                <p class="text-xs md:text-sm text-aesthetic-clay">Planes interactivos diseñados para nutrir tu corazón en cada etapa.</p>
+            </div>
+
+            <!-- Diseño Web de Dos Columnas para Planes -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- Selector de Planes (Izquierda - Columna de 4) -->
+                <div class="lg:col-span-4 space-y-3">
+                    <p class="text-xs font-bold text-aesthetic-clay uppercase tracking-widest px-1">Selecciona tu Ruta:</p>
+                    
+                    <button onclick="selectPlan('ansiedad')" id="btnPlanAnsiedad" class="w-full p-4 bg-white border-2 border-aesthetic-clay rounded-3xl text-left shadow-sm transition-all flex items-center justify-between">
+                        <div>
+                            <span class="text-[9px] uppercase font-bold text-aesthetic-roseDark">7 Días de Estudio</span>
+                            <p class="text-sm font-bold text-aesthetic-dark mt-1">Venciendo la Ansiedad</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-aesthetic-roseDark"></i>
+                    </button>
+                    
+                    <button onclick="selectPlan('proposito')" id="btnPlanProposito" class="w-full p-4 bg-white border border-aesthetic-rose/40 rounded-3xl text-left shadow-sm opacity-60 hover:opacity-100 transition-all flex items-center justify-between">
+                        <div>
+                            <span class="text-[9px] uppercase font-bold text-aesthetic-roseDark">5 Días de Estudio</span>
+                            <p class="text-sm font-bold text-aesthetic-dark mt-1">Mi Identidad & Propósito</p>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-aesthetic-clay/40"></i>
+                    </button>
+                </div>
+
+                <!-- Detalle y Progreso del Plan Activo (Derecha - Columna de 8) -->
+                <div class="lg:col-span-8 bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-aesthetic-rose/30 space-y-6">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-neutral-100 pb-4">
+                        <div>
+                            <h3 class="font-serif text-xl md:text-2xl font-bold text-aesthetic-dark" id="activePlanTitle">Plan: Ansiedad y Paz</h3>
+                            <p class="text-xs text-aesthetic-clay mt-1">Pasajes de la Biblia para calmar un corazón preocupado.</p>
+                        </div>
+                        <div class="bg-aesthetic-bg px-4 py-2 rounded-2xl flex items-center gap-2">
+                            <span class="text-xs text-aesthetic-clay font-medium">Progreso total:</span>
+                            <span class="text-sm font-serif font-bold text-aesthetic-roseDark" id="planProgressPercent">28%</span>
+                        </div>
+                    </div>
+
+                    <!-- Barra de progreso interactiva -->
+                    <div class="w-full h-3 bg-neutral-100 rounded-full overflow-hidden">
+                        <div id="planProgressBar" class="h-full bg-gradient-to-r from-aesthetic-rose to-aesthetic-roseDark rounded-full transition-all duration-500" style="width: 28%;"></div>
+                    </div>
+
+                    <!-- Lista de Lecturas Diarias -->
+                    <div class="space-y-3" id="readingDaysList">
+                        <!-- Inyectado dinámicamente por JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA: ORACIÓN (DIARIO + MEDITACIÓN GUIADA) -->
+        <div id="tab-oracion" class="page-transition space-y-8 hidden max-w-5xl mx-auto">
+            <div class="text-center py-4">
+                <span class="text-[10px] uppercase tracking-widest text-aesthetic-roseDark font-bold block mb-1">El Altar Personal</span>
+                <h2 class="font-serif text-3xl text-aesthetic-dark font-bold">Oración, Respiración & Diario</h2>
+                <p class="text-xs md:text-sm text-aesthetic-clay">Un refugio seguro en la web para dialogar en intimidad con Dios.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                
+                <!-- SECCIÓN: RESPIRACIÓN Y AUDIO RELAJANTE (Izquierda - Columna de 5) -->
+                <div class="lg:col-span-5 bg-gradient-to-br from-[#ECE0D1] to-[#DBC1AC] rounded-3xl p-6 md:p-8 shadow-sm border border-aesthetic-rose text-center space-y-5">
+                    <span class="text-[10px] uppercase tracking-widest text-aesthetic-dark font-bold block">Meditación de Respiración</span>
+                    <p class="text-xs md:text-sm text-aesthetic-dark/80">Usa este círculo visual animado para centrar tu mente y calmar tu espíritu antes de comenzar tu oración escrita.</p>
+                    
+                    <!-- Círculo de Respiración Animado -->
+                    <div class="relative w-40 h-40 mx-auto flex items-center justify-center my-6">
+                        <div id="breathCircle" class="absolute w-24 h-24 rounded-full bg-aesthetic-rose/60 flex items-center justify-center transition-all duration-1000"></div>
+                        <span id="breathText" class="z-10 text-xs font-bold text-aesthetic-dark tracking-wider uppercase">Empezar</span>
+                    </div>
+
+                    <!-- Botones de Audio Relajante y Control de Respiración -->
+                    <div class="flex flex-col sm:flex-row justify-center gap-3">
+                        <button onclick="toggleAmbientSound()" id="btnSound" class="w-full sm:w-auto px-5 py-2.5 bg-aesthetic-dark text-white rounded-full text-xs font-medium flex items-center justify-center gap-2 hover:bg-neutral-800 transition-colors shadow-sm">
+                            <i class="fa-solid fa-music"></i> <span id="soundText">Música de Fondo</span>
+                        </button>
+                        <button onclick="startBreathingExercise()" id="btnBreathe" class="w-full sm:w-auto px-5 py-2.5 bg-white text-aesthetic-dark border border-aesthetic-clay rounded-full text-xs font-bold hover:bg-aesthetic-bg transition-colors shadow-sm">
+                            Comenzar Guía
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN: DIARIO DE ORACIÓN PERSONAL (Derecha - Columna de 7) -->
+                <div class="lg:col-span-7 bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-aesthetic-rose/30 space-y-6">
+                    <h3 class="font-serif text-lg md:text-xl text-aesthetic-dark font-bold flex items-center gap-2.5">
+                        <i class="fa-solid fa-pen-fancy text-aesthetic-roseDark"></i> Mi Diario Íntimo de Oración
+                    </h3>
+                    
+                    <!-- Entrada de Oración -->
+                    <div class="space-y-3.5">
+                        <input type="text" id="prayerTitle" placeholder="Título o Enfoque (Ej: Mis estudios, Por sanidad de mamá, Gratitud)" class="w-full px-4 py-3 bg-aesthetic-bg border border-aesthetic-rose/50 rounded-xl text-xs md:text-sm focus:ring-1 focus:ring-aesthetic-roseDark outline-none text-aesthetic-dark font-medium">
+                        <textarea id="prayerContent" placeholder="Escribe aquí de forma libre todo lo que deseas entregarle a Dios hoy..." class="w-full h-32 px-4 py-3 bg-aesthetic-bg border border-aesthetic-rose/50 rounded-xl text-xs md:text-sm focus:ring-1 focus:ring-aesthetic-roseDark outline-none text-aesthetic-dark leading-relaxed resize-none"></textarea>
+                        
+                        <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                            <!-- Categorías de oración -->
+                            <select id="prayerCategory" class="bg-aesthetic-bg border border-aesthetic-rose/50 text-xs text-aesthetic-clay rounded-xl px-3 py-2.5 focus:ring-1 focus:ring-aesthetic-roseDark outline-none font-medium">
+                                <option value="Petición">🙏 Petición Personal</option>
+                                <option value="Agradecimiento">✨ Gratitud / Alabanza</option>
+                                <option value="Intercesión">❤️ Orar por Alguien más</option>
+                            </select>
+                            <button onclick="savePrayer()" class="px-6 py-2.5 bg-aesthetic-clay hover:bg-aesthetic-dark text-white text-xs font-bold rounded-xl transition-colors shadow-sm">
+                                Guardar en mi Altar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Lista de Oraciones Almacenadas con scroll elegante -->
+                    <div class="space-y-3 pt-3">
+                        <p class="text-[10px] uppercase tracking-widest text-aesthetic-clay/70 font-bold border-b border-aesthetic-rose/20 pb-2">Oraciones Guardadas en tu Navegador</p>
+                        <div id="prayersList" class="space-y-3 max-h-80 overflow-y-auto pr-1">
+                            <!-- Inyectadas dinámicamente por JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA: GALERÍA DE IMÁGENES INSPIRADORAS -->
+        <div id="tab-galeria" class="page-transition space-y-8 hidden max-w-5xl mx-auto">
+            <div class="text-center py-4">
+                <span class="text-[10px] uppercase tracking-widest text-aesthetic-roseDark font-bold block mb-1">Inspiración Cotidiana</span>
+                <h2 class="font-serif text-3xl text-aesthetic-dark font-bold">Fondos de Pantalla Descargables</h2>
+                <p class="text-xs md:text-sm text-aesthetic-clay">Lleva promesas bíblicas y reflexiones estéticas directo a tu celular o computadora.</p>
+            </div>
+
+            <!-- Grid de Galería adaptado a pantalla web (4 columnas en escritorio) -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <!-- Item 1 -->
+                <div class="group relative rounded-2xl overflow-hidden aspect-[9/16] shadow-md border border-aesthetic-rose/20 bg-neutral-100">
+                    <img src="https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=400" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Fe">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                        <p class="font-serif text-[13px] italic text-white/90 mb-1">"Todo lo puedo en Cristo"</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] text-white/60 font-medium">Filipenses 4:13</span>
+                            <button onclick="triggerDownload('Filipenses 4:13')" class="w-8 h-8 bg-white/20 hover:bg-white text-white hover:text-aesthetic-dark rounded-xl flex items-center justify-center text-xs transition-colors">
+                                <i class="fa-solid fa-arrow-down"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Item 2 -->
+                <div class="group relative rounded-2xl overflow-hidden aspect-[9/16] shadow-md border border-aesthetic-rose/20 bg-neutral-100">
+                    <img src="https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?q=80&w=400" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Paz">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                        <p class="font-serif text-[13px] italic text-white/90 mb-1">"Él calma toda tormenta"</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] text-white/60 font-medium">Salmo 107:29</span>
+                            <button onclick="triggerDownload('Salmo 107:29')" class="w-8 h-8 bg-white/20 hover:bg-white text-white hover:text-aesthetic-dark rounded-xl flex items-center justify-center text-xs transition-colors">
+                                <i class="fa-solid fa-arrow-down"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Item 3 -->
+                <div class="group relative rounded-2xl overflow-hidden aspect-[9/16] shadow-md border border-aesthetic-rose/20 bg-neutral-100">
+                    <img src="https://images.unsplash.com/photo-1447752875215-b2761acb3c5d?q=80&w=400" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Amor">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-4 flex flex-col justify-end">
+                        <p class="font-serif text-[13px] italic text-white/90 mb-1">"Amor incondicional"</p>
+                        <div class="flex justify-between items-center">
+                            <span class="text-[10px] text-white/60 font-medium">1 Corintios 13:4</span>
+                            <button onclick="triggerDownload('1 Corintios 13:4')" class="w-8 h-8 bg-white/20 hover:bg-white text-white hover:text-aesthetic-dark rounded-xl flex items-center justify-center text-xs transition-colors">
+                                <i class="fa-solid fa-arrow-down"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Item 4 (Bloqueado con corona Premium para mostrar monetización) -->
+                <div class="group relative rounded-2xl overflow-hidden aspect-[9/16] shadow-md border border-aesthetic-rose/20 bg-neutral-100">
+                    <img src="https://images.unsplash.com/photo-1475924156734-496f6cac6ec1?q=80&w=400" class="w-full h-full object-cover opacity-60 blur-[1px] group-hover:scale-105 transition-transform duration-500" alt="Premium">
+                    <!-- Overlay de bloqueo -->
+                    <div class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center p-4 text-center">
+                        <i class="fa-solid fa-crown text-amber-400 text-2xl mb-2 animate-bounce"></i>
+                        <p class="text-white text-sm font-bold">Contenido Premium</p>
+                        <p class="text-white/75 text-[10px] mb-4 leading-relaxed max-w-[150px]">Suscríbete hoy para descargar este set en alta resolución.</p>
+                        <button onclick="switchTab('premium')" class="px-4 py-1.5 bg-amber-400 text-neutral-900 text-xs font-bold rounded-xl hover:bg-amber-300 transition-colors">Desbloquear</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA: PREMIUM & AJUSTES -->
+        <div id="tab-premium" class="page-transition space-y-8 hidden max-w-4xl mx-auto">
+            <div class="text-center py-4">
+                <span class="text-[10px] uppercase tracking-widest text-amber-600 font-bold block mb-1">Crecimiento y Apoyo</span>
+                <h2 class="font-serif text-3xl text-aesthetic-dark font-bold flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-crown text-amber-500"></i> Membresía Gracia Premium
+                </h2>
+                <p class="text-xs md:text-sm text-aesthetic-clay">Un pequeño aporte mensual que mantiene viva esta comunidad virtual.</p>
+            </div>
+
+            <!-- Tarjeta Principal de Suscripción en Web (Dos columnas) -->
+            <div class="bg-gradient-to-br from-[#FFFDF9] via-[#FAF3E0] to-[#F1E4C3] rounded-3xl p-6 md:p-10 shadow-md border-2 border-amber-300/60 relative overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div class="absolute top-4 right-4 bg-amber-400 text-neutral-900 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Plan Recomendado</div>
+                
+                <div class="space-y-4">
+                    <span class="text-[10px] uppercase tracking-widest text-amber-700 font-bold block">Acceso Total e Ilimitado</span>
+                    <h3 class="font-serif text-2xl text-aesthetic-dark font-bold">Tu momento de paz sin interrupciones</h3>
+                    
+                    <div class="space-y-3 pt-2">
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-check text-amber-600 text-sm"></i>
+                            <span class="text-xs md:text-sm text-aesthetic-dark/90 font-medium">Oraciones y meditaciones con audio guiado.</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-check text-amber-600 text-sm"></i>
+                            <span class="text-xs md:text-sm text-aesthetic-dark/90 font-medium">Rutas de estudio bíblico ilimitadas.</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-check text-amber-600 text-sm"></i>
+                            <span class="text-xs md:text-sm text-aesthetic-dark/90 font-medium">Descargas ilimitadas de fondos estéticos HD.</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-check text-amber-600 text-sm"></i>
+                            <span class="text-xs md:text-sm text-aesthetic-dark/90 font-medium font-semibold text-amber-800">Remoción total de anuncios publicitarios.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t md:border-t-0 md:border-l border-amber-300/40 pt-6 md:pt-0 md:pl-10 text-center flex flex-col justify-center items-center space-y-4">
+                    <div>
+                        <p class="text-xs text-aesthetic-clay font-medium">Suscripción mensual simple:</p>
+                        <p class="text-4xl font-serif font-bold text-aesthetic-dark mt-1">$1.99 <span class="text-xs font-sans text-aesthetic-clay">USD / mes</span></p>
+                    </div>
+
+                    <!-- Botón Interactivo de Simulación de Pago -->
+                    <button onclick="togglePremiumStatus()" id="btnActionPremium" class="w-full max-w-xs py-3.5 bg-neutral-900 text-white rounded-full text-xs font-bold hover:bg-neutral-800 transition-colors shadow-sm flex items-center justify-center gap-2">
+                        <span>Iniciar Prueba Gratis de 7 Días</span>
+                    </button>
+                    <p class="text-[10px] text-center text-aesthetic-clay">Cancela de manera sencilla desde tu panel de usuario en cualquier momento.</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Toast de Notificación Personalizado flotante -->
+    <div id="toastNotification" class="fixed bottom-6 left-1/2 -translate-x-1/2 md:left-auto md:right-6 md:translate-x-0 bg-aesthetic-dark text-aesthetic-bg text-xs px-5 py-3 rounded-2xl shadow-xl opacity-0 pointer-events-none transition-all duration-300 z-50 flex items-center gap-2.5 max-w-[90%] md:max-w-md">
+        <i class="fa-solid fa-circle-info text-aesthetic-rose"></i>
+        <span id="toastMessage">Notificación enviada</span>
+    </div>
+
+    <!-- Script de Funcionamiento de la Web App -->
+    <script>
+        // --- Estado Global de la App ---
+        let appState = {
+            isPremium: false,
+            showAds: true,
+            activeTab: 'hoy',
+            prayers: [
+                { id: 1, title: 'Por la salud de mi abuela', content: 'Señor, pon tu mano sanadora sobre ella y dale fuerza.', category: 'Petición', answered: false, date: 'Ayer' },
+                { id: 2, title: 'Gracias por proveer para mis estudios', content: 'Agradecida porque pudimos cubrir la matrícula de este ciclo universitario.', category: 'Agradecimiento', answered: true, date: 'Hace 3 días' }
+            ],
+            readingProgress: {
+                ansiedad: [true, true, false], // Días 1 y 2 marcados, 3 desmarcado
+                proposito: [false, false, false, false, false]
+            },
+            activePlan: 'ansiedad'
+        };
+
+        // --- Cargar del Almacenamiento Local (Local Storage) ---
+        if (localStorage.getItem('gracia_paz_webapp_state')) {
+            try {
+                appState = JSON.parse(localStorage.getItem('gracia_paz_webapp_state'));
+            } catch (e) {
+                console.error("Error al cargar estado previo, usando predeterminado.");
+            }
+        }
+
+        // --- Inicialización General al Cargar la Página ---
+        window.onload = function() {
+            renderPrayers();
+            updateProgress();
+            applyPremiumVisualState();
+            // Iniciar por defecto con el plan activo
+            selectPlan(appState.activePlan);
+        };
+
+        function saveState() {
+            localStorage.setItem('gracia_paz_webapp_state', JSON.stringify(appState));
+        }
+
+        // --- Enrutamiento entre Pestañas (Web App Layout) ---
+        function switchTab(tabId) {
+            appState.activeTab = tabId;
+            saveState();
+
+            // Ocultar todas las pestañas
+            const tabs = ['hoy', 'lectura', 'oracion', 'galeria', 'premium'];
+            tabs.forEach(t => {
+                const el = document.getElementById(`tab-${t}`);
+                if (el) el.classList.add('hidden');
+                
+                // Actualizar barra de navegación Lateral (Desktop)
+                const navBtn = document.getElementById(`nav-${t}`);
+                if (navBtn) {
+                    navBtn.className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-aesthetic-clay hover:text-aesthetic-dark hover:bg-white/50 font-medium text-sm transition-all duration-200";
+                }
+
+                // Actualizar barra de navegación Inferior (Mobile)
+                const mobBtn = document.getElementById(`mobile-nav-${t}`);
+                if (mobBtn) {
+                    mobBtn.className = "flex flex-col items-center gap-0.5 text-aesthetic-clay/60";
+                }
+            });
+
+            // Mostrar pestaña activa
+            const activeEl = document.getElementById(`tab-${tabId}`);
+            if (activeEl) {
+                activeEl.classList.remove('hidden');
+                activeEl.classList.add('animate-fade-in');
+            }
+
+            // Activar botón de navegación lateral correspondiente
+            const activeNavBtn = document.getElementById(`nav-${tabId}`);
+            if (activeNavBtn) {
+                activeNavBtn.className = "w-full flex items-center gap-3.5 px-4 py-3 rounded-2xl text-aesthetic-roseDark bg-white shadow-sm font-semibold text-sm transition-all duration-200";
+            }
+
+            // Activar botón de navegación móvil correspondiente
+            const activeMobBtn = document.getElementById(`mobile-nav-${tabId}`);
+            if (activeMobBtn) {
+                activeMobBtn.className = "flex flex-col items-center gap-0.5 text-aesthetic-roseDark";
+            }
+
+            // Scroll al inicio del contenedor
+            document.getElementById('appContent').scrollTop = 0;
+        }
+
+        // --- STREAMING_CHUNK:Writing ToneJS Audio and Breathing guide controllers... -->
+        // --- Música de Ambiente Relajante (Tone.js para simulación acústica real) ---
+        let synth = null;
+        let isAudioPlaying = false;
+        let audioLoopId = null;
+
+        function toggleAmbientSound() {
+            if (!isAudioPlaying) {
+                try {
+                    if (!synth) {
+                        synth = new Tone.PolySynth(Tone.Synth, {
+                            oscillator: { type: "triangle" },
+                            envelope: { attack: 1.5, decay: 2, sustain: 0.6, release: 3 }
+                        }).toDestination();
+                        synth.volume.value = -16;
+                    }
+                    
+                    Tone.start();
+                    isAudioPlaying = true;
+                    document.getElementById('soundText').innerText = "Reproduciendo...";
+                    document.getElementById('btnSound').classList.replace('bg-aesthetic-dark', 'bg-emerald-600');
+                    showToast("Música celestial relajante iniciada (Tone.js) 🧘‍♀️");
+
+                    const notes = ["C4", "E4", "G4", "B4", "D5", "B4", "G4", "E4"];
+                    let index = 0;
+                    
+                    audioLoopId = setInterval(() => {
+                        if (isAudioPlaying && synth) {
+                            synth.triggerAttackRelease(notes[index], "1n");
+                            index = (index + 1) % notes.length;
+                        }
+                    }, 2200);
+
+                } catch (e) {
+                    console.error("Audio bloqueado o no compatible:", e);
+                    showToast("No se pudo iniciar el sintetizador de audio.");
+                }
+            } else {
+                stopAmbientAudio();
+            }
+        }
+
+        function stopAmbientAudio() {
+            isAudioPlaying = false;
+            if (audioLoopId) {
+                clearInterval(audioLoopId);
+                audioLoopId = null;
+            }
+            if (synth) {
+                synth.releaseAll();
+            }
+            document.getElementById('soundText').innerText = "Música de Fondo";
+            document.getElementById('btnSound').classList.replace('bg-emerald-600', 'bg-aesthetic-dark');
+            showToast("Música ambiental detenida.");
+        }
+
+        // --- Guía Interactiva de Respiración ---
+        let breathingTimer = null;
+        function startBreathingExercise() {
+            const circle = document.getElementById('breathCircle');
+            const text = document.getElementById('breathText');
+            const btn = document.getElementById('btnBreathe');
+
+            if (circle.classList.contains('breathing-active')) {
+                circle.classList.remove('breathing-active');
+                text.innerText = "Empezar";
+                btn.innerText = "Comenzar Guía";
+                clearInterval(breathingTimer);
+                showToast("Sesión de respiración pausada.");
+            } else {
+                circle.classList.add('breathing-active');
+                btn.innerText = "Detener Guía";
+                showToast("Sigue el ritmo del círculo: Inhala y Exhala 🌸");
+                
+                let breatheIn = true;
+                text.innerText = "Inhala";
+                
+                breathingTimer = setInterval(() => {
+                    breatheIn = !breatheIn;
+                    text.innerText = breatheIn ? "Inhala" : "Exhala";
+                }, 4000);
+            }
+        }
+
+        // --- STREAMING_CHUNK:Developing interactive Reading Plan triggers... -->
+        // --- Gestión de Planes de Lectura ---
+        function selectPlan(planKey) {
+            appState.activePlan = planKey;
+            
+            const btnAnsiedad = document.getElementById('btnPlanAnsiedad');
+            const btnProposito = document.getElementById('btnPlanProposito');
+            const title = document.getElementById('activePlanTitle');
+            const listContainer = document.getElementById('readingDaysList');
+
+            if (planKey === 'ansiedad') {
+                btnAnsiedad.className = "w-full p-4 bg-white border-2 border-aesthetic-clay rounded-3xl text-left shadow-sm transition-all flex items-center justify-between";
+                btnProposito.className = "w-full p-4 bg-white border border-aesthetic-rose/40 rounded-3xl text-left shadow-sm opacity-60 hover:opacity-100 transition-all flex items-center justify-between";
+                title.innerText = "Plan: Ansiedad y Paz";
+                
+                listContainer.innerHTML = `
+                    <div class="flex items-center justify-between p-4 bg-aesthetic-bg rounded-2xl border border-aesthetic-rose/20">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 bg-aesthetic-rose text-aesthetic-dark text-xs font-bold rounded-xl flex items-center justify-center">1</span>
+                            <div>
+                                <p class="text-xs md:text-sm font-bold text-aesthetic-dark">No se preocupen por nada</p>
+                                <p class="text-[10px] md:text-xs text-aesthetic-clay">Filipenses 4:6-7</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" ${appState.readingProgress.ansiedad[0] ? 'checked' : ''} onchange="toggleReading(0)" class="w-5 h-5 rounded-lg text-aesthetic-clay focus:ring-aesthetic-rose border-aesthetic-rose/50 cursor-pointer">
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-aesthetic-bg rounded-2xl border border-aesthetic-rose/20">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 bg-aesthetic-rose text-aesthetic-dark text-xs font-bold rounded-xl flex items-center justify-center">2</span>
+                            <div>
+                                <p class="text-xs md:text-sm font-bold text-aesthetic-dark">Echa tus ansiedades sobre Él</p>
+                                <p class="text-[10px] md:text-xs text-aesthetic-clay">1 Pedro 5:7</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" ${appState.readingProgress.ansiedad[1] ? 'checked' : ''} onchange="toggleReading(1)" class="w-5 h-5 rounded-lg text-aesthetic-clay focus:ring-aesthetic-rose border-aesthetic-rose/50 cursor-pointer">
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-aesthetic-bg rounded-2xl border border-aesthetic-rose/20">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 bg-aesthetic-rose text-aesthetic-dark text-xs font-bold rounded-xl flex items-center justify-center">3</span>
+                            <div>
+                                <p class="text-xs md:text-sm font-bold text-aesthetic-dark">La paz que sobrepasa todo entendimiento</p>
+                                <p class="text-[10px] md:text-xs text-aesthetic-clay">Juan 14:27</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" ${appState.readingProgress.ansiedad[2] ? 'checked' : ''} onchange="toggleReading(2)" class="w-5 h-5 rounded-lg text-aesthetic-clay focus:ring-aesthetic-rose border-aesthetic-rose/50 cursor-pointer">
+                    </div>
+                    <!-- Día 4 bloqueado sutilmente para incentivar monetización -->
+                    <div class="flex items-center justify-between p-4 bg-aesthetic-bg/50 rounded-2xl border border-dashed border-aesthetic-rose/30 opacity-75">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 bg-neutral-200 text-neutral-400 text-xs font-bold rounded-xl flex items-center justify-center"><i class="fa-solid fa-lock text-[10px]"></i></span>
+                            <div>
+                                <p class="text-xs md:text-sm font-bold text-neutral-500">Bajo la sombra de tus alas</p>
+                                <p class="text-[10px] md:text-xs text-neutral-400">Salmo 91</p>
+                            </div>
+                        </div>
+                        <span class="text-[9px] uppercase tracking-wider font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full"><i class="fa-solid fa-crown mr-1"></i> Premium</span>
+                    </div>
+                `;
+            } else {
+                btnProposito.className = "w-full p-4 bg-white border-2 border-aesthetic-clay rounded-3xl text-left shadow-sm transition-all flex items-center justify-between";
+                btnAnsiedad.className = "w-full p-4 bg-white border border-aesthetic-rose/40 rounded-3xl text-left shadow-sm opacity-60 hover:opacity-100 transition-all flex items-center justify-between";
+                title.innerText = "Plan: Identidad & Propósito";
+
+                listContainer.innerHTML = `
+                    <div class="flex items-center justify-between p-4 bg-aesthetic-bg rounded-2xl border border-aesthetic-rose/20">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 bg-aesthetic-rose text-aesthetic-dark text-xs font-bold rounded-xl flex items-center justify-center">1</span>
+                            <div>
+                                <p class="text-xs md:text-sm font-bold text-aesthetic-dark">Hecha de forma maravillosa y asombrosa</p>
+                                <p class="text-[10px] md:text-xs text-aesthetic-clay">Salmo 139:14</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" ${appState.readingProgress.proposito[0] ? 'checked' : ''} onchange="toggleReading(0)" class="w-5 h-5 rounded-lg text-aesthetic-clay focus:ring-aesthetic-rose border-aesthetic-rose/50 cursor-pointer">
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-aesthetic-bg rounded-2xl border border-aesthetic-rose/20">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 bg-aesthetic-rose text-aesthetic-dark text-xs font-bold rounded-xl flex items-center justify-center">2</span>
+                            <div>
+                                <p class="text-xs md:text-sm font-bold text-aesthetic-dark">Antes de darte vida, ya te había elegido</p>
+                                <p class="text-[10px] md:text-xs text-aesthetic-clay">Jeremías 1:5</p>
+                            </div>
+                        </div>
+                        <input type="checkbox" ${appState.readingProgress.proposito[1] ? 'checked' : ''} onchange="toggleReading(1)" class="w-5 h-5 rounded-lg text-aesthetic-clay focus:ring-aesthetic-rose border-aesthetic-rose/50 cursor-pointer">
+                    </div>
+                    <!-- Bloqueado para plan propósito -->
+                    <div class="flex items-center justify-between p-4 bg-aesthetic-bg/50 rounded-2xl border border-dashed border-aesthetic-rose/30 opacity-75">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 bg-neutral-200 text-neutral-400 text-xs font-bold rounded-xl flex items-center justify-center"><i class="fa-solid fa-lock text-[10px]"></i></span>
+                            <div>
+                                <p class="text-xs md:text-sm font-bold text-neutral-500">Un futuro lleno de esperanza y paz</p>
+                                <p class="text-[10px] md:text-xs text-neutral-400">Jeremías 29:11</p>
+                            </div>
+                        </div>
+                        <span class="text-[9px] uppercase tracking-wider font-bold text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full"><i class="fa-solid fa-crown mr-1"></i> Premium</span>
+                    </div>
+                `;
+            }
+            updateProgress();
+            saveState();
+        }
+
+        function toggleReading(index) {
+            appState.readingProgress[appState.activePlan][index] = !appState.readingProgress[appState.activePlan][index];
+            updateProgress();
+            saveState();
+            showToast("Tu avance ha sido guardado exitosamente");
+        }
+
+        function updateProgress() {
+            const currentPlanList = appState.readingProgress[appState.activePlan];
+            const totalTasks = currentPlanList.length;
+            const completedTasks = currentPlanList.filter(Boolean).length;
+            
+            const percent = Math.round((completedTasks / totalTasks) * 100);
+            
+            document.getElementById('planProgressPercent').innerText = `${percent}%`;
+            document.getElementById('planProgressBar').style.width = `${percent}%`;
+        }
+
+        // --- STREAMING_CHUNK:Adding Prayer Journal CRUD operations... -->
+        // --- Diario de Oración Interactivo ---
+        function renderPrayers() {
+            const container = document.getElementById('prayersList');
+            container.innerHTML = '';
+
+            if (appState.prayers.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-aesthetic-clay">
+                        <p class="text-xs md:text-sm">No tienes oraciones agregadas hoy.</p>
+                        <p class="text-[10px] md:text-xs">Tómate un instante para expresar tus sentimientos y peticiones.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            appState.prayers.forEach(p => {
+                container.innerHTML += `
+                    <div class="p-4 bg-aesthetic-bg rounded-2xl border ${p.answered ? 'border-emerald-300 bg-emerald-50/40' : 'border-aesthetic-rose/30'} flex justify-between items-start gap-4 transition-all">
+                        <div class="space-y-1.5 flex-1">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[9px] uppercase tracking-wider font-bold px-2 py-0.5 rounded ${p.category === 'Agradecimiento' ? 'bg-amber-100 text-amber-800' : p.category === 'Intercesión' ? 'bg-blue-100 text-blue-800' : 'bg-rose-100 text-rose-800'}">
+                                    ${p.category}
+                                </span>
+                                ${p.answered ? '<span class="text-[10px] font-semibold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full"><i class="fa-solid fa-check"></i> Respondida</span>' : ''}
+                            </div>
+                            <h4 class="text-xs md:text-sm font-bold text-aesthetic-dark ${p.answered ? 'line-through opacity-60' : ''}">${p.title}</h4>
+                            <p class="text-xs text-aesthetic-clay/95 leading-relaxed ${p.answered ? 'opacity-60' : ''}">${p.content}</p>
+                            <span class="text-[9px] text-aesthetic-clay/60 block pt-1">Guardada: ${p.date}</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-1">
+                            <button onclick="toggleAnswered(${p.id})" class="p-1.5 text-xs text-aesthetic-clay hover:text-emerald-600 transition-colors" title="${p.answered ? 'Marcar como pendiente' : 'Marcar como respondida'}">
+                                <i class="fa-solid ${p.answered ? 'fa-arrow-rotate-left' : 'fa-check'}"></i>
+                            </button>
+                            <button onclick="deletePrayer(${p.id})" class="p-1.5 text-xs text-aesthetic-clay hover:text-rose-500 transition-colors" title="Eliminar">
+                                <i class="fa-regular fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function savePrayer() {
+            const titleInput = document.getElementById('prayerTitle');
+            const contentInput = document.getElementById('prayerContent');
+            const categoryInput = document.getElementById('prayerCategory');
+
+            if (!titleInput.value.trim() || !contentInput.value.trim()) {
+                showToast("Por favor, rellena el título y la descripción de tu oración.");
+                return;
+            }
+
+            const newPrayer = {
+                id: Date.now(),
+                title: titleInput.value.trim(),
+                content: contentInput.value.trim(),
+                category: categoryInput.value,
+                answered: false,
+                date: 'Hoy ✨'
+            };
+
+            appState.prayers.unshift(newPrayer);
+            saveState();
+            renderPrayers();
+
+            titleInput.value = '';
+            contentInput.value = '';
+            showToast("🙏 Oración guardada en tu altar personal.");
+        }
+
+        function toggleAnswered(id) {
+            const index = appState.prayers.findIndex(p => p.id === id);
+            if (index !== -1) {
+                appState.prayers[index].answered = !appState.prayers[index].answered;
+                saveState();
+                renderPrayers();
+                showToast(appState.prayers[index].answered ? "🎉 ¡Qué gran noticia! Oración respondida." : "Oración reabierta.");
+            }
+        }
+
+        function deletePrayer(id) {
+            appState.prayers = appState.prayers.filter(p => p.id !== id);
+            saveState();
+            renderPrayers();
+            showToast("Oración removida del diario.");
+        }
+
+        // --- STREAMING_CHUNK:Coding payment and ad display simulators... -->
+        // --- Notificaciones Toast Globales ---
+        function showToast(message) {
+            const toast = document.getElementById('toastNotification');
+            const msgSpan = document.getElementById('toastMessage');
+            
+            msgSpan.innerText = message;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            toast.classList.add('opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        // --- Interacciones Rápidas ---
+        function shareVerse() {
+            showToast("📱 Copiando plantilla y texto aesthetic listo para tus Stories de Instagram...");
+        }
+
+        function toggleFavoriteVerse(btn) {
+            const icon = btn.querySelector('i');
+            if (icon.classList.contains('fa-regular')) {
+                icon.className = "fa-solid fa-heart text-rose-500";
+                showToast("Versículo agregado a favoritos ❤️");
+            } else {
+                icon.className = "fa-regular fa-heart";
+                showToast("Versículo removido de tus favoritos.");
+            }
+        }
+
+        function playGuidedAudio() {
+            showToast("🎧 Cargando reproductor de audio. Preparando devocional diario guiado...");
+        }
+
+        function triggerDownload(verse) {
+            showToast(`🎨 Guardando fondo de pantalla HD (${verse}) en tu carpeta de descargas...`);
+        }
+
+        // --- Control y Simulación de Monetización ---
+        function toggleAdSystem() {
+            appState.showAds = !appState.showAds;
+            saveState();
+
+            const adBanner = document.getElementById('adBanner');
+            const btn = document.getElementById('btnToggleAd');
+
+            if (appState.showAds) {
+                adBanner.classList.remove('hidden');
+                btn.innerText = "Activos";
+                btn.className = "px-2.5 py-1 bg-emerald-100 text-emerald-800 text-[9px] font-bold rounded-lg transition-colors";
+                showToast("Anuncios integrados sutiles activados.");
+            } else {
+                adBanner.classList.add('hidden');
+                btn.innerText = "Inactivos";
+                btn.className = "px-2.5 py-1 bg-neutral-200 text-neutral-600 text-[9px] font-bold rounded-lg transition-colors";
+                showToast("Anuncios apagados para simulación.");
+            }
+        }
+
+        function togglePremiumStatus() {
+            appState.isPremium = !appState.isPremium;
+            if (appState.isPremium) {
+                appState.showAds = false;
+            }
+            saveState();
+            applyPremiumVisualState();
+
+            if (appState.isPremium) {
+                showToast("✨ ¡Gracia Premium Activo! Gracias por simular el apoyo.");
+            } else {
+                showToast("Retornando al plan gratuito del prototipo.");
+            }
+        }
+
+        function applyPremiumVisualState() {
+            const badge = document.getElementById('premiumBadge');
+            const mobBadge = document.getElementById('mobilePremiumBadge');
+            const btnAction = document.getElementById('btnActionPremium');
+            const adBanner = document.getElementById('adBanner');
+
+            if (appState.isPremium) {
+                // Estado Premium
+                const premiumHTML = `<i class="fa-solid fa-crown text-neutral-900"></i><span>MIEMBRO PRO</span>`;
+                badge.className = "flex items-center gap-1 bg-gradient-to-r from-amber-400 to-amber-500 text-neutral-900 text-[9px] font-bold px-2 py-1 rounded-full shadow-sm";
+                badge.innerHTML = premiumHTML;
+
+                mobBadge.className = "flex items-center gap-1 bg-gradient-to-r from-amber-400 to-amber-500 text-neutral-900 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm";
+                mobBadge.innerHTML = premiumHTML;
+
+                btnAction.innerHTML = `<i class="fa-solid fa-check mr-1.5"></i> Disfrutando Gracia Premium (Clic para cancelar)`;
+                btnAction.className = "w-full max-w-xs py-3.5 bg-gradient-to-r from-amber-400 to-amber-500 text-neutral-900 rounded-full text-xs font-bold shadow-sm flex items-center justify-center gap-2";
+                
+                // Forzar remoción de anuncios en premium
+                adBanner.classList.add('hidden');
+            } else {
+                // Estado Gratuito
+                const freeHTML = `<i class="fa-solid fa-crown text-amber-600 animate-pulse"></i><span>PRO</span>`;
+                badge.className = "flex items-center gap-1 bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 text-[9px] font-bold px-2 py-1 rounded-full shadow-sm hover:scale-105 transition-transform cursor-pointer";
+                badge.innerHTML = freeHTML;
+
+                mobBadge.className = "flex items-center gap-1 bg-gradient-to-r from-amber-100 to-amber-200 text-amber-800 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm cursor-pointer";
+                mobBadge.innerHTML = freeHTML;
+
+                btnAction.innerHTML = `<span>Iniciar Prueba Gratis de 7 Días</span>`;
+                btnAction.className = "w-full max-w-xs py-3.5 bg-neutral-900 text-white rounded-full text-xs font-bold hover:bg-neutral-800 transition-colors shadow-sm flex items-center justify-center gap-2";
+                
+                if (appState.showAds) {
+                    adBanner.classList.remove('hidden');
+                }
+            }
+        }
+    </script>
+</body>
+</html>
